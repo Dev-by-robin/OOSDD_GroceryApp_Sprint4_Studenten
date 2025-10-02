@@ -20,7 +20,39 @@ namespace Grocery.Core.Services
         }
         public List<BoughtProducts> Get(int? productId)
         {
-            throw new NotImplementedException();
+            // Geen productId meegegeven
+            if (!productId.HasValue)
+            {
+                return new List<BoughtProducts>();
+            }
+
+
+            // Alle grocery list items ophalen die overeenkomen met het gegeven productId
+            var allGroceryListItems = _groceryListItemsRepository.GetAll()
+                .Where(item => item.ProductId == productId.Value)
+                .ToList();
+
+            List<BoughtProducts> boughtProducts = new List<BoughtProducts>();
+
+            foreach (GroceryListItem item in allGroceryListItems)
+            {
+                // Krijg de grocery list waar het item bij hoort
+                var groceryList = _groceryListRepository.Get(item.GroceryListId);
+                if (groceryList == null) continue;
+
+                // Krijg de client die de grocery list heeft
+                var client = _clientRepository.Get(groceryList.ClientId);
+                if (client == null) continue;
+
+                // Krijg de productdetails
+                var product = _productRepository.Get(productId.Value);
+                if (product == null) continue;
+
+                // Maak en voeg een BoughtProducts item toe
+                boughtProducts.Add(new BoughtProducts(client, groceryList, product));
+            }
+
+            return boughtProducts;
         }
     }
 }
