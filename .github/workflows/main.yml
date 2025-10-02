@@ -20,6 +20,9 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      - name: Restore .NET MAUI workloads
+        run: dotnet workload restore
+
       - name: Install Android SDK & Start Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -30,6 +33,7 @@ jobs:
           script: echo "Emulator ready"
           wait-for-boot: true
           avd-options: "-no-window -gpu swiftshader_indirect"
+
 
       - name: Restore dependencies
         run: dotnet restore Grocery.App/Grocery.App.csproj
