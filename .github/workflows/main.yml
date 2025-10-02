@@ -22,10 +22,12 @@ jobs:
       - name: Install Android SDK & Build Tools
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 33
-          target: default
-          arch: x86_64
-          force-avd-creation: true
+            api-level: 33
+            target: default
+            arch: x86_64
+            force-avd-creation: true
+            script: echo "SDK installed"
+
 
       - name: Restore dependencies
         run: dotnet restore Grocery.App/Grocery.App.csproj
