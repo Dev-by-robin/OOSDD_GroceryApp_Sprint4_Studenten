@@ -1,35 +1,43 @@
-name: MAUI Unit Tests
- 
+name: Build MAUI Android App
+
 on:
   push:
-    branches:
-      - main
-      - infra/runner-toevoegen
-      - develop
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - main
- 
+    branches: [ "main" ]
+
 jobs:
-  test:
-    runs-on: windows-latest  # Of windows-latest/macOS-latest als specifiek platform nodig is
+  build-android:
+    name: Build Android
+    runs-on: ubuntu-latest
     steps:
-      - name: Haal de repository op
-        uses: actions/checkout@v4
- 
-      - name: Installeer .NET SDK
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.0.x'  # Gebruik de juiste versie voor MAUI
- 
-      - name: Installeer MAUI workloads
-        run: dotnet workload install maui-android
- 
-      - name: Herstel afhankelijkheden
-        run: dotnet restore --runtime win-x64
- 
-      - name: Bouw de applicatie
-        run: dotnet build --configuration Release --no-restore --runtime win-x64
- 
-      - name: Voer unit tests uit
-        run: dotnet test --configuration Release --no-restore --no-build --verbosity normal
+          dotnet-version: 8.0.x
+
+      - name: Install Android SDK & Build Tools
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          target: default
+          arch: x86_64
+          force-avd-creation: true
+
+      - name: Restore dependencies
+        run: dotnet restore Grocery.App/Grocery.App.csproj
+
+      - name: Build Android
+        run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-android -r android-arm64 --no-restore
+
+      - name: Publish Android
+        run: dotnet publish Grocery.App/Grocery.App.csproj -c Release -f net8.0-android -r android-arm64 -o ./publish/android
+
+      - name: Upload Android artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-build
+          path: ./publish/android
