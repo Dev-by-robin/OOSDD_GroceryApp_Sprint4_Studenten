@@ -10,6 +10,7 @@ jobs:
   build-android:
     name: Build Android
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -19,15 +20,16 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Install Android SDK & Build Tools
+      - name: Install Android SDK & Start Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-            api-level: 33
-            target: default
-            arch: x86_64
-            force-avd-creation: true
-            script: echo "SDK installed"
-
+          api-level: 33
+          target: default
+          arch: x86_64
+          force-avd-creation: true
+          script: echo "Emulator ready"
+          wait-for-boot: true
+          avd-options: "-no-window -gpu swiftshader_indirect"
 
       - name: Restore dependencies
         run: dotnet restore Grocery.App/Grocery.App.csproj
